@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:600,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Chatingen</title>
+
+    
+</head> 
+<body>
+<div class="chat-container">
+    <div class="chat-header">
+        <span>Chatingen</span>
+        <span class="user-nick">{{ nick }}</span>
+    </div>
+    <div class="chat-messages" id="messages"></div>
+    <div id="typing-info"></div>
+    <div class="chat-form-wrap">
+        <form id="msgForm" autocomplete="off">
+            <input type="file" id="fileInput" style="display:none;" accept="image/*,.pdf,.txt,.doc,.docx">
+            <input type="text" id="msgInput" placeholder="Mesaj yaz..." maxlength="200" required autofocus>
+            <button type="button" id="fileBtn" title="Dosya Ekle">📎</button>
+            <button type="submit">Gönder</button>
+        </form>
+    </div>
+</div>
+
+<!-- Medya önizleme modalı -->
+<div id="media-modal" style="display:none;position:fixed;z-index:99;top:0;left:0;width:100vw;height:100vh;background:rgba(14,22,34,0.95);justify-content:center;align-items:center;">
+  <img id="modal-img" src="" style="max-width:95vw;max-height:85vh;border-radius:16px;box-shadow:0 4px 30px #000b;">
+  <span id="modal-close" style="position:absolute;top:24px;right:32px;font-size:2.4em;color:#fff;cursor:pointer;font-weight:bold;">×</span>
+</div>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+    const socket = io();
+    socket.emit('join', {});
+
+    const messages = document.getElementById('messages');
+    const form = document.getElementById('msgForm');
+    const input = document.getElementById('msgInput');
+    const fileInput = document.getElementById('fileInput');
+    const fileBtn = document.getElementById('fileBtn');
+    const typingInfo = document.getElementById('typing-info');
+    const mediaModal = document.getElementById('media-modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalClose = document.getElementById('modal-close');
+
+    let typingTimeout = null;
+
+    // Yazıyor... eventi
+    input.addEventListener('input', () => {
+        socket.emit('typing', { typing: input.value.length > 0 });
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            socket.emit('typing', { typing: false });
+        }, 1200);
+    });
+    // Resme tıklanırsa modal aç
+    messages.addEventListener('click', function(e) {
+    if (e.target.tagName === 'IMG') {
+        modalImg.src = e.target.src;
+        mediaModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Scroll kilitle
+    }
+});
+// Modal kapat (çarpı ya da dışına tıkla)
+    modalClose.onclick = closeModal;
+    mediaModal.onclick = function(e) {
+        if (e.target === mediaModal) closeModal();
+};
+function closeModal() {
+    mediaModal.style.display = 'none';
+    modalImg.src = '';
+    document.body.style.overflow = '';
+}
+// Klavye ESC ile kapama
+document.addEventListener('keydown', function(e){
+    if (e.key === "Escape") closeModal();
+});
+
+    socket.on('typing', data => {
+        if (data.count > 0) {
+            if (data.typing_users.length === 1) {
+                typingInfo.innerText = data.typing_users[0] + " yazıyor...";
+            } else {
+                typingInfo.innerText = data.typing_users.join(", ") + " yazıyor...";
+            }
+        } else {
+            typingInfo.innerText = "";
+        }
+    });
+
+    // Dosya ekle butonu
+    fileBtn.onclick = () => fileInput.click();
+
+    // Dosya seçilince upload başlat
+    fileInput.onchange = () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        if (file.size > 5*1024*1024) { // 5MB sınırı
+            alert("Dosya çok büyük! (max 5MB)");
+            fileInput.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+            socket.emit('upload_file', {
+                filename: file.name,
+                filedata: e.target.result
+            });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // Dosya upload edildiğinde mesajı tetikle
+    socket.on('file_uploaded', data => {
+        socket.emit('message', {
+            msg: '',
+            type: 'file',
+            file_url: data.file_url,
+            filename: data.filename
+        });
+        fileInput.value = '';
+    });
+
+    // Mesaj ekleme fonksiyonu (görsel ve dosya desteğiyle)
+    function addMessage(data) {
+        const div = document.createElement('div');
+        div.className = 'msg';
+        let msgHtml = `<span class="nick" style="color:${data.color}">${data.nick}</span> `;
+        if (data.file_url) {
+            const ext = (data.file_url.split('.').pop() || '').toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                msgHtml += `<img src="${data.file_url}" alt="image" style="max-width:170px;max-height:140px;border-radius:9px;vertical-align:middle;box-shadow:0 2px 12px #0002;margin-right:6px;" loading="lazy">`;
+            } else {
+                msgHtml += `<a href="${data.file_url}" target="_blank" style="color:#b583d7;font-size:.97em;vertical-align:middle;"><b>${data.filename || 'Dosya'}</b> <span style="font-size:1.1em;">⬇️</span></a>`;
+            }
+        }
+        msgHtml += `<span class="msg-text">${data.msg || ''}</span> <span class="timestamp">${data.timestamp || ''}</span>`;
+        div.innerHTML = msgHtml;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    socket.on('message', addMessage);
+
+    socket.on('user_joined', data => {
+        const div = document.createElement('div');
+        div.className = 'info';
+        div.textContent = `${data.nick} sohbete katıldı.`;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    });
+
+    socket.on('user_left', data => {
+        const div = document.createElement('div');
+        div.className = 'info';
+        div.textContent = `${data.nick} sohbetten ayrıldı.`;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    });
+
+    socket.on('message_history', msgArr => {
+        msgArr.forEach(addMessage);
+    });
+
+    form.onsubmit = e => {
+        e.preventDefault();
+        if (input.value.trim()) {
+            socket.emit('message', {msg: input.value});
+            input.value = '';
+        }
+    };
+
+    socket.on('edit_message', data => {
+        // Eklemek istersen: Mesajı düzenle
+    });
+
+    socket.on('delete_message', data => {
+        // Eklemek istersen: Mesajı sil
+    });
+
+    socket.on('upload_error', data => {
+        alert('Dosya yüklenemedi: ' + (data.error || ""));
+    });
+</script>
+</body>
+</html>
