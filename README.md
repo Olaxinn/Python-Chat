@@ -1,30 +1,29 @@
-````markdown
-# 💬 Chatingen
+# 💬 Chatingen — Realtime Messaging Platform
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
-![Flask](https://img.shields.io/badge/Flask-2.0%2B-green)
-![Socket.IO](https://img.shields.io/badge/Socket.IO-Realtime-black)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python)
+![Flask](https://img.shields.io/badge/Flask-2.0%2B-green?style=for-the-badge&logo=flask)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-Realtime-black?style=for-the-badge&logo=socketdotio)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-**Chatingen**, Python (Flask) ve Socket.IO teknolojileri kullanılarak geliştirilmiş, modern arayüze sahip, gerçek zamanlı bir mesajlaşma uygulamasıdır. Kullanıcıların anlık olarak mesajlaşmasına, dosya paylaşmasına ve birbirlerinin durumlarını (yazıyor...) görmesine olanak tanır.
+**Chatingen**, Flask + Socket.IO altyapısı ile geliştirilen, gerçek zamanlı etkileşim sunan, modern arayüzlü bir mesajlaşma uygulamasıdır. Mesajların anlık iletilmesi, dosya paylaşımı, kullanıcı durum takibi ve kalıcı sohbet geçmişi gibi özelliklere sahip tam donanımlı, responsif bir sohbet deneyimi sunar.
 
 ---
 
 ## 🚀 Özellikler
 
-Bu proje aşağıdaki temel özellikleri barındırır:
+**Chatingen** aşağıdaki güçlü özelliklere sahiptir:
 
-* **Gerçek Zamanlı İletişim:** WebSocket protokolü sayesinde sayfa yenilemeye gerek kalmadan anlık mesajlaşma.
-* **Dosya Paylaşımı:** Görsel (JPG, PNG, GIF) ve belge (PDF, TXT, DOC) yükleme desteği (Max 5MB).
-* **Görsel Önizleme:** Sohbet penceresi içinde görsellere tıklandığında açılan şık bir modal (popup) görüntüleyici.
-* **Yazıyor İndikatörü:** Karşı taraf mesaj yazarken "X yazıyor..." bildirimi.
-* **Kalıcı Mesajlar:** SQLite veritabanı entegrasyonu sayesinde sunucu yeniden başlatılsa bile son 100 mesajın korunması.
-* **Otomatik Emoji Dönüştürücü:** `:)`, `<3` gibi ifadelerin otomatik olarak emojiye (😊, ❤️) dönüşmesi.
-* **Kullanıcı Yönetimi:**
-    * Nick belirleyerek giriş yapma.
-    * Rastgele kullanıcı rengi ataması.
-    * Giriş/Çıkış logları.
-* **Responsive Tasarım:** Mobil ve masaüstü uyumlu arayüz.
+- **⚡ Gerçek Zamanlı Mesajlaşma:** WebSocket yapısı sayesinde anında mesaj akışı.
+- **📁 Dosya Paylaşımı:** JPG, PNG, GIF, PDF, TXT, DOC dosyaları (maks 5MB) yükleme desteği.
+- **🖼️ Görsel Önizleme:** Mesaj içindeki görsellere tıklayınca açılan şık modal görüntüleyici.
+- **⌨️ Yazıyor... İndikatörü:** Kullanıcı mesaj yazarken durum gösterimi.
+- **🗃️ Kalıcı Mesajlar:** SQLite ile son 100 mesaj otomatik olarak saklanır.
+- **😀 Emoji Dönüştürücü:** `:)`, `:(`, `<3` gibi ifadeler otomatik emojiye dönüşür.
+- **👤 Kullanıcı Sistemi:**
+  - Nickname ile giriş,
+  - Rastgele kullanıcı rengi,
+  - Giriş/çıkış logları.
+- **📱 Responsive Tasarım:** Mobil & masaüstü uyumlu modern arayüz.
 
 ---
 
@@ -32,85 +31,90 @@ Bu proje aşağıdaki temel özellikleri barındırır:
 
 ```text
 Chatingen/
-├── app.py               # Ana Flask uygulaması ve Socket.IO olayları
-├── messages.db          # SQLite veritabanı (İlk çalıştırmada otomatik oluşur)
+├── app.py               # Flask + Socket.IO ana uygulama
+├── messages.db          # SQLite veritabanı
 ├── static/
-│   ├── style.css        # CSS Stil dosyaları
-│   └── uploads/         # Yüklenen dosyaların tutulduğu klasör
+│   ├── style.css        # Stil dosyaları
+│   └── uploads/         # Yüklenen dosyalar
 ├── templates/
 │   ├── login.html       # Giriş ekranı
 │   └── chat.html        # Sohbet arayüzü
-└── README.md            # Proje dokümantasyonu
-````
+└── README.md            # Dokümantasyon
+```
 
------
+---
 
 ## 🛠️ Kurulum
 
-Projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izleyin.
+Aşağıdaki adımlarla projeyi yerel ortamda çalıştırabilirsiniz.
 
-### 1\. Repoyu Klonlayın veya İndirin
+### 1️⃣ Repoyu Klonlayın
 
-Dosyaları bir klasöre çıkarın ve terminali o klasörde açın.
+Projeyi bilgisayarınıza indirin ve terminali proje klasöründe açın.
 
-### 2\. Sanal Ortam Oluşturun (Opsiyonel)
+### 2️⃣ Sanal Ortam (Opsiyonel)
 
 ```bash
-# Windows için
+# Windows
 python -m venv venv
 venv\Scripts\activate
 
-# Mac/Linux için
+# Mac / Linux
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3\. Gerekli Kütüphaneleri Yükleyin
+### 3️⃣ Gereksinimleri Yükleyin
 
 ```bash
 pip install flask flask-socketio
 ```
 
-### 4\. Uygulamayı Başlatın
+### 4️⃣ Sunucuyu Başlatın
 
 ```bash
 python app.py
 ```
 
-Uygulama başladığında terminalde bir adres göreceksiniz. Tarayıcınızdan **`http://127.0.0.1:5000`** adresine giderek uygulamayı kullanmaya başlayabilirsiniz.
+Ardından tarayıcınızdan şu adresi açın:
 
------
+**http://127.0.0.1:5000**
 
-## ⚙️ Veritabanı Yönetimi (Sıfırlama)
+---
 
-Mesajlar `messages.db` dosyasında saklanır. Sohbet geçmişini tamamen temizlemek isterseniz, proje dizininde yeni bir python dosyası (örn: `reset_db.py`) oluşturup şu kodları çalıştırabilirsiniz:
+## ⚙️ Veritabanı Temizleme (Opsiyonel)
+
+Mesaj geçmişini sıfırlamak için `reset_db.py` adlı yeni bir Python dosyası oluşturup aşağıdakini ekleyin:
 
 ```python
 import sqlite3
 
 con = sqlite3.connect('messages.db')
 cur = con.cursor()
-cur.execute("DELETE FROM messages")  # Tablodaki tüm satırları siler
+cur.execute("DELETE FROM messages")
 con.commit()
 con.close()
 print("Veritabanı temizlendi.")
 ```
 
------
+Çalıştırmanız yeterlidir.
+
+---
 
 ## 🤝 Katkıda Bulunma
 
-1.  Bu repoyu forklayın.
-2.  Yeni bir özellik dalı (feature branch) oluşturun (`git checkout -b yeni-ozellik`).
-3.  Değişikliklerinizi commitleyin (`git commit -m 'Yeni özellik eklendi'`).
-4.  Dalınızı pushlayın (`git push origin yeni-ozellik`).
-5.  Bir Pull Request oluşturun.
+1. Repo'yu forklayın.
+2. Yeni bir dal oluşturun:  
+   `git checkout -b feature/yeni-ozellik`
+3. Değişikliklerinizi commitleyin:  
+   `git commit -m "Yeni özellik eklendi"`
+4. Dalınızı pushlayın:  
+   `git push origin feature/yeni-ozellik`
+5. Pull Request açın.
 
------
+---
 
 ## 📄 Lisans
 
-Bu proje MIT Lisansı ile lisanslanmıştır.
-
-```
+Bu proje **MIT Lisansı** ile sunulmuştur.
 
